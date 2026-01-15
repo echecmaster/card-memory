@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Jeu de Memory</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #2c3e50;
+        color: white;
+        text-align: center;
+    }
+
+    h1 {
+        margin-top: 20px;
+    }
+
+    .info {
+        margin: 10px;
+        font-size: 18px;
+    }
+
+    .game {
+        width: 440px;
+        margin: 20px auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    .card {
+        width: 100px;
+        height: 100px;
+        background: #3498db;
+        font-size: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        border-radius: 10px;
+        user-select: none;
+    }
+
+    .card.flipped {
+        background: #ecf0f1;
+        color: #2c3e50;
+        cursor: default;
+    }
+
+    .card.matched {
+        background: #2ecc71;
+        cursor: default;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<h1>🧠 Jeu de Memory</h1>
+
+<div class="info">
+    ⏱ Temps : <span id="time">0</span>s |
+    🎯 Coups : <span id="moves">0</span>
+</div>
+
+<div class="game" id="game"></div>
+
+<button onclick="resetGame()">🔄 Recommencer</button>
+
+<script>
+    const symbols = ["🍎","🍌","🍒","🍇","🍉","🍍","🥝","🍑"];
+    let cards = [...symbols, ...symbols];
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let moves = 0;
+    let matchedPairs = 0;
+    let time = 0;
+    let timer;
+
+    const game = document.getElementById("game");
+    const movesDisplay = document.getElementById("moves");
+    const timeDisplay = document.getElementById("time");
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startTimer() {
+        timer = setInterval(() => {
+            time++;
+            timeDisplay.textContent = time;
+        }, 1000);
+    }
+
+    function createBoard() {
+        shuffle(cards);
+        game.innerHTML = "";
+        cards.forEach(symbol => {
+            const card = document.createElement("div");
+            card.classList.add("card");
+            card.dataset.symbol = symbol;
+            card.textContent = "";
+            card.addEventListener("click", flipCard);
+            game.appendChild(card);
+        });
+    }
+
+    function flipCard() {
+        if (lockBoard || this === firstCard || this.classList.contains("matched")) return;
+
+        if (moves === 0 && !timer) startTimer();
+
+        this.classList.add("flipped");
+        this.textContent = this.dataset.symbol;
+
+        if (!firstCard) {
+            firstCard = this;
+            return;
+        }
+
+        secondCard = this;
+        moves++;
+        movesDisplay.textContent = moves;
+
+        checkMatch();
+    }
+
+    function checkMatch() {
+        if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+            firstCard.classList.add("matched");
+            secondCard.classList.add("matched");
+            matchedPairs++;
+            resetTurn();
+
+            if (matchedPairs === symbols.length) {
+                clearInterval(timer);
+                setTimeout(() => {
+                    alert(`🎉 Bravo !\nTemps : ${time}s\nCoups : ${moves}`);
+                }, 300);
+            }
+        } else {
+            lockBoard = true;
+            setTimeout(() => {
+                firstCard.classList.remove("flipped");
+                secondCard.classList.remove("flipped");
+                firstCard.textContent = "";
+                secondCard.textContent = "";
+                resetTurn();
+            }, 1000);
+        }
+    }
+
+    function resetTurn() {
+        firstCard = null;
+        secondCard = null;
+        lockBoard = false;
+    }
+
+    function resetGame() {
+        clearInterval(timer);
+        timer = null;
+        time = 0;
+        moves = 0;
+        matchedPairs = 0;
+        timeDisplay.textContent = 0;
+        movesDisplay.textContent = 0;
+        createBoard();
+    }
+
+    createBoard();
+</script>
+
+</body>
+</html>
