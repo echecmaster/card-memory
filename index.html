@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>charlélie-brain</title>
+<title>Jeu de Memory - Niveaux</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
     }
 
     h1 {
-        margin-top: 20px;
+        margin-top: 15px;
     }
 
     .info {
@@ -20,24 +20,27 @@
         font-size: 18px;
     }
 
+    .controls {
+        margin: 15px;
+    }
+
     .game {
-        width: 440px;
         margin: 20px auto;
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
+        gap: 8px;
+        justify-content: center;
     }
 
     .card {
-        width: 100px;
-        height: 100px;
+        width: 70px;
+        height: 70px;
         background: #3498db;
-        font-size: 40px;
+        font-size: 28px;
         display: flex;
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        border-radius: 10px;
+        border-radius: 8px;
         user-select: none;
     }
 
@@ -52,18 +55,29 @@
         cursor: default;
     }
 
-    button {
-        padding: 10px 20px;
+    button, select {
+        padding: 8px 15px;
         font-size: 16px;
-        border: none;
         border-radius: 5px;
+        border: none;
         cursor: pointer;
+        margin: 5px;
     }
 </style>
 </head>
 <body>
 
-<h1>🧠CHARLELIE BRAIN🧠</h1>
+<h1>🧠 Jeu de Memory</h1>
+
+<div class="controls">
+    🎚 Niveau :
+    <select id="levelSelect">
+        <option value="facile">Facile (16 cartes)</option>
+        <option value="medium">Medium (50 cartes)</option>
+        <option value="expert">Expert (100 cartes)</option>
+    </select>
+    <button onclick="startGame()">▶ Démarrer</button>
+</div>
 
 <div class="info">
     ⏱ Temps : <span id="time">0</span>s |
@@ -72,18 +86,24 @@
 
 <div class="game" id="game"></div>
 
-<button onclick="resetGame()">🔄 Recommencer</button>
-
 <script>
-    const symbols = ["🍎","🍌","🍒","🍇","🍉","🍍","🥝","🍑"];
-    let cards = [...symbols, ...symbols];
+    const allSymbols = [
+        "🍎","🍌","🍒","🍇","🍉","🍍","🥝","🍑","🍓","🍋",
+        "🥑","🍆","🥕","🌽","🥔","🍔","🍕","🌭","🍟","🥨",
+        "🍩","🍪","🎂","🍫","🍬","🍭","☕","🍵","🧃","🥤",
+        "⚽","🏀","🏈","🎾","🎲","🎮","🚗","✈️","🚀","🚲",
+        "🐶","🐱","🐼","🐸","🦁","🐵","🐙","🐢","🦄","🐝"
+    ];
+
+    let cards = [];
     let firstCard = null;
     let secondCard = null;
     let lockBoard = false;
     let moves = 0;
     let matchedPairs = 0;
     let time = 0;
-    let timer;
+    let timer = null;
+    let totalPairs = 0;
 
     const game = document.getElementById("game");
     const movesDisplay = document.getElementById("moves");
@@ -100,9 +120,33 @@
         }, 1000);
     }
 
-    function createBoard() {
+    function startGame() {
+        resetGame();
+
+        const level = document.getElementById("levelSelect").value;
+
+        let cardCount;
+        let columns;
+
+        if (level === "facile") {
+            cardCount = 16;
+            columns = 4;
+        } else if (level === "medium") {
+            cardCount = 50;
+            columns = 10;
+        } else {
+            cardCount = 100;
+            columns = 10;
+        }
+
+        totalPairs = cardCount / 2;
+
+        game.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+
+        cards = allSymbols.slice(0, totalPairs);
+        cards = [...cards, ...cards];
         shuffle(cards);
-        game.innerHTML = "";
+
         cards.forEach(symbol => {
             const card = document.createElement("div");
             card.classList.add("card");
@@ -140,7 +184,7 @@
             matchedPairs++;
             resetTurn();
 
-            if (matchedPairs === symbols.length) {
+            if (matchedPairs === totalPairs) {
                 clearInterval(timer);
                 setTimeout(() => {
                     alert(`🎉 Bravo !\nTemps : ${time}s\nCoups : ${moves}`);
@@ -154,7 +198,7 @@
                 firstCard.textContent = "";
                 secondCard.textContent = "";
                 resetTurn();
-            }, 1000);
+            }, 800);
         }
     }
 
@@ -172,10 +216,8 @@
         matchedPairs = 0;
         timeDisplay.textContent = 0;
         movesDisplay.textContent = 0;
-        createBoard();
+        game.innerHTML = "";
     }
-
-    createBoard();
 </script>
 
 </body>
