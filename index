@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Jeu de Memory</title>
+<title>charlélie-brain</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -63,7 +63,7 @@
 </head>
 <body>
 
-<h1>🧠 Jeu de Memory</h1>
+<h1>🧠CHARLELIE BRAIN🧠</h1>
 
 <div class="info">
     ⏱ Temps : <span id="time">0</span>s |
